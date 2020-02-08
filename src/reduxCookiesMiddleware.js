@@ -3,15 +3,18 @@ import setCookie from './cookieApi';
 /**
  * Middleware to persist state in cookies.
  * @param {Object} paths
- * @param {Object} customOptions
+ * @param {Object} options
  */
-const reduxCookiesMiddleware = (paths = {}, customOptions = {}) => {
-    const options = {
+const reduxCookiesMiddleware = (paths = {}, options = {}) => {
+
+    options = options || {
         logger: console.error,
         setCookie,
         defaultEqualityCheck: (a, b) => (a === b),
         defaultDeleteCheck: value => (typeof value === 'undefined'),
-        ...customOptions
+        expire: 365,
+        secure: false,
+        path: '/'
     };
 
     const _getVal = (state, path) => {
@@ -45,11 +48,16 @@ const reduxCookiesMiddleware = (paths = {}, customOptions = {}) => {
             const equalityCheck = state.equalityCheck || options.defaultEqualityCheck;
             const deleteCheck = state.deleteCheck || options.defaultDeleteCheck;
 
+            const {name, expire, secure, path} = state || {
+                expire: options.expire,
+                secure: options.secure,
+                path:options.path
+            };
             if (!equalityCheck(prevVal, nextVal)) {
                 if (deleteCheck(nextVal)) {
-                    options.setCookie(state.name, JSON.stringify(nextVal), 0);
+                    options.setCookie(name, JSON.stringify(nextVal), 0, secure, path);
                 } else {
-                    options.setCookie(state.name, JSON.stringify(nextVal));
+                    options.setCookie(name, JSON.stringify(nextVal), expire, secure, path);
                 }
             }
         });

@@ -21,3 +21,5 @@ eslint
 
 # custom
 dist/
+
+.idea
